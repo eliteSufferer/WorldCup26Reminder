@@ -10,8 +10,10 @@ import com.worldcup26.reminder.data.remote.MatchDto
 import com.worldcup26.reminder.data.remote.ScheduleApi
 import com.worldcup26.reminder.domain.Match
 import com.worldcup26.reminder.work.AlarmScheduler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.time.Instant
 
 /**
@@ -44,9 +46,14 @@ class MatchRepository(
     /** Calendars the user can choose between in settings. */
     fun availableCalendars() = calendar.listCalendars()
 
-    suspend fun follow(matchId: String, reminderMinutesBefore: Int, calendarId: Long? = null) {
-        val match = dao.getMatch(matchId) ?: return
-        val eventId = calendar.upsertEvent(match, calendarId)
+    /** Returns true if the match was also written to the device calendar. */
+    suspend fun follow(
+        matchId: String,
+        reminderMinutesBefore: Int,
+        calendarId: Long? = null,
+    ): Boolean = withContext(Dispatchers.IO) {
+        val match = dao.getMatch(matchId) ?: return@withContext false
+        val eventId = calendar.upsertEvent(match, calendarId, reminderMinutesBefore)
         dao.upsertSelection(
             SelectionEntity(
                 matchId = matchId,
@@ -56,6 +63,7 @@ class MatchRepository(
             )
         )
         alarms.schedule(match, reminderMinutesBefore)
+        eventId != null
     }
 
     suspend fun unfollow(matchId: String) {

@@ -54,7 +54,8 @@ class MainActivity : ComponentActivity() {
                             filter = filter,
                             refreshing = refreshing,
                             initialTab = initialTab,
-                            onRefresh = viewModel::refresh,
+                            events = viewModel.events,
+                            onRefresh = { viewModel.refresh() },
                             onToggleFollow = viewModel::toggleFollow,
                             onQueryChange = viewModel::setQuery,
                             onGroupChange = viewModel::setGroup,
@@ -88,7 +89,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // Populate on first launch when the cache is still empty.
-        if (viewModel.allMatches.value.isEmpty()) viewModel.refresh()
+        if (viewModel.allMatches.value.isEmpty()) viewModel.refresh(silent = true)
     }
 
     private fun requestRuntimePermissions() {

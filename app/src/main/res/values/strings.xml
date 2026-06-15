@@ -15,6 +15,13 @@
     <string name="empty_loading">Loading schedule…</string>
     <string name="empty_no_matches">No matches yet. Pull to refresh.</string>
 
+    <!-- Snackbars -->
+    <string name="snackbar_saved_calendar">Successfully saved! Added to your calendar.</string>
+    <string name="snackbar_saved_no_calendar">Saved! (calendar unavailable — check permission)</string>
+    <string name="snackbar_removed">Removed from your matches.</string>
+    <string name="snackbar_refreshed">Schedule updated · %d matches</string>
+    <string name="snackbar_refresh_failed">Couldn\'t update schedule. Check your connection.</string>
+
     <!-- Tabs -->
     <string name="tab_groups">Groups</string>
     <string name="tab_playoff">Playoff</string>

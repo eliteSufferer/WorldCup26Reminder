@@ -39,7 +39,11 @@ class CalendarWriter(private val context: Context) {
      * Writes to [preferredCalendarId] when it is still a valid writable calendar,
      * otherwise falls back to the account's primary calendar.
      */
-    fun upsertEvent(match: MatchEntity, preferredCalendarId: Long? = null): Long? {
+    fun upsertEvent(
+        match: MatchEntity,
+        preferredCalendarId: Long? = null,
+        reminderMinutesBefore: Int? = null,
+    ): Long? {
         if (!hasPermission()) return null
         val calendarId = resolveCalendarId(preferredCalendarId) ?: return null
 
@@ -54,9 +58,21 @@ class CalendarWriter(private val context: Context) {
             put(CalendarContract.Events.DTSTART, match.kickoffEpochMillis)
             put(CalendarContract.Events.DTEND, match.kickoffEpochMillis + matchDurationMillis)
             put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
+            if (reminderMinutesBefore != null) put(CalendarContract.Events.HAS_ALARM, 1)
         }
         val uri = context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
-        return uri?.let { ContentUris.parseId(it) }
+            ?: return null
+        val eventId = ContentUris.parseId(uri)
+
+        if (reminderMinutesBefore != null) {
+            val reminder = ContentValues().apply {
+                put(CalendarContract.Reminders.EVENT_ID, eventId)
+                put(CalendarContract.Reminders.MINUTES, reminderMinutesBefore)
+                put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT)
+            }
+            context.contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminder)
+        }
+        return eventId
     }
 
     fun deleteEvent(eventId: Long) {

@@ -8,6 +8,7 @@ import com.worldcup26.reminder.data.MatchRepository
 import com.worldcup26.reminder.data.settings.SettingsRepository
 import com.worldcup26.reminder.domain.Match
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,9 +16,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** One-shot status messages surfaced as a snackbar. */
+sealed interface UiEvent {
+    /** Match followed; [addedToCalendar] tells whether the calendar write succeeded. */
+    data class Saved(val addedToCalendar: Boolean) : UiEvent
+    data object Removed : UiEvent
+    data class Refreshed(val count: Int) : UiEvent
+    data object RefreshFailed : UiEvent
+}
 
 /** Active list filters for the Groups tab. */
 data class MatchFilter(
@@ -58,6 +69,9 @@ class MatchesViewModel(
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
 
+    private val _events = Channel<UiEvent>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
+
     // --- Settings ---
 
     val defaultReminderMinutes: StateFlow<Int> = settings.defaultReminderMinutes
@@ -78,10 +92,13 @@ class MatchesViewModel(
 
     // --- Actions ---
 
-    fun refresh() {
+    /** [silent] suppresses the snackbar — used for the automatic first-launch load. */
+    fun refresh(silent: Boolean = false) {
         viewModelScope.launch {
             _refreshing.value = true
             runCatching { repository.refresh() }
+                .onSuccess { if (!silent) _events.send(UiEvent.Refreshed(it)) }
+                .onFailure { if (!silent) _events.send(UiEvent.RefreshFailed) }
             _refreshing.value = false
         }
     }
@@ -99,12 +116,14 @@ class MatchesViewModel(
         viewModelScope.launch {
             if (match.isFollowed) {
                 repository.unfollow(match.id)
+                _events.send(UiEvent.Removed)
             } else {
-                repository.follow(
+                val addedToCalendar = repository.follow(
                     matchId = match.id,
                     reminderMinutesBefore = settings.defaultReminderMinutes.first(),
                     calendarId = settings.selectedCalendarId.first(),
                 )
+                _events.send(UiEvent.Saved(addedToCalendar))
             }
         }
     }

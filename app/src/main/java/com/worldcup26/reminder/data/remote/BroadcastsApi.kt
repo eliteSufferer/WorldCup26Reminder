@@ -47,8 +47,9 @@ class BroadcastsApi(
     companion object {
         private const val ASSET_NAME = "broadcasts.json"
 
-        // Point this at the raw broadcasts.json once it is hosted (e.g. GitHub raw)
-        // to enable updates without shipping a new app version.
-        const val REMOTE_URL = ""
+        // Hosted broadcasts.json — lets the broadcaster split be updated without
+        // shipping a new app version. Falls back to the bundled asset on any failure.
+        const val REMOTE_URL =
+            "https://raw.githubusercontent.com/eliteSufferer/WorldCup26Reminder/master/app/src/main/assets/broadcasts.json"
     }
 }

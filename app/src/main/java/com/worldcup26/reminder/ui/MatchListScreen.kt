@@ -1,5 +1,6 @@
 package com.worldcup26.reminder.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +49,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.worldcup26.reminder.R
@@ -69,6 +72,13 @@ private val dayFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("EEE, d MMM", Locale.getDefault())
 private val timeFormatter: DateTimeFormatter =
     DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+
+/** Maps a broadcaster label to its bundled logo, or null to fall back to a TV icon. */
+private fun broadcasterLogo(broadcaster: String): Int? = when (broadcaster) {
+    "Матч ТВ" -> R.drawable.logo_match_tv
+    "Кинопоиск" -> R.drawable.logo_kinopoisk
+    else -> null
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -310,14 +320,24 @@ private fun MatchCard(match: Match, zone: ZoneId, onToggleFollow: (Match) -> Uni
                 match.broadcaster?.let { broadcaster ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        Icon(
-                            Icons.Filled.Tv,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.height(14.dp),
-                        )
+                        val logo = broadcasterLogo(broadcaster)
+                        if (logo != null) {
+                            Image(
+                                painter = painterResource(logo),
+                                contentDescription = broadcaster,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.height(16.dp),
+                            )
+                        } else {
+                            Icon(
+                                Icons.Filled.Tv,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.height(14.dp),
+                            )
+                        }
                         Text(
                             text = broadcaster,
                             style = MaterialTheme.typography.labelMedium,

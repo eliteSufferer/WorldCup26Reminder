@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#1B5E20</color>
+    <string name="action_follow">Follow</string>
+    <string name="action_refresh">Refresh schedule</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_unfollow">Unfollow</string>
+    <string name="app_name">WC26 Reminder</string>
+    <string name="channel_reminders_desc">Reminders before matches you are following</string>
+    <string name="channel_reminders_name">Match reminders</string>
+    <string name="empty_loading">Loading schedule…</string>
+    <string name="empty_no_matches">No matches yet. Pull to refresh.</string>
+    <string name="filter_all_groups">All groups</string>
+    <string name="filter_followed">Followed</string>
+    <string name="filter_group">Group</string>
+    <string name="filter_search_team">Search team</string>
+    <string name="filter_upcoming">Upcoming</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_calendar_default">Primary (automatic)</string>
+    <string name="settings_calendar_header">Calendar</string>
+    <string name="settings_calendar_none">No writable calendar found. Grant calendar access.</string>
+    <string name="settings_calendar_note">New follows are written here. Existing events are not moved.</string>
+    <string name="settings_reminder_header">Default reminder</string>
+    <string name="settings_reminder_minutes">%d min before kickoff</string>
+    <string name="settings_title">Settings</string>
+    <string name="title_matches">World Cup 2026</string>
+    <style name="Theme.WorldCup26Reminder" parent="android:Theme.Material.Light.NoActionBar"/>
+</resources>

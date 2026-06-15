@@ -10,11 +10,18 @@ import androidx.core.content.ContextCompat
 import com.worldcup26.reminder.data.local.MatchEntity
 import java.util.TimeZone
 
+/** A writable calendar the user can pick as the reminder destination. */
+data class CalendarInfo(
+    val id: Long,
+    val displayName: String,
+    val accountName: String,
+)
+
 /**
- * Writes a followed match into the device's primary calendar via the Calendar
- * Provider. Events created here are picked up by whatever sync adapter owns that
- * calendar (typically Google Calendar), so no separate calendar integration is
- * needed. Only matches the user explicitly follows are written.
+ * Writes a followed match into a device calendar via the Calendar Provider. Events
+ * created here are picked up by whatever sync adapter owns that calendar (typically
+ * Google Calendar), so no separate calendar integration is needed. Only matches the
+ * user explicitly follows are written.
  */
 class CalendarWriter(private val context: Context) {
 
@@ -27,10 +34,14 @@ class CalendarWriter(private val context: Context) {
             ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) ==
             PackageManager.PERMISSION_GRANTED
 
-    /** Inserts the event and returns its id, or null if it could not be written. */
-    fun upsertEvent(match: MatchEntity): Long? {
+    /**
+     * Inserts the event and returns its id, or null if it could not be written.
+     * Writes to [preferredCalendarId] when it is still a valid writable calendar,
+     * otherwise falls back to the account's primary calendar.
+     */
+    fun upsertEvent(match: MatchEntity, preferredCalendarId: Long? = null): Long? {
         if (!hasPermission()) return null
-        val calendarId = primaryCalendarId() ?: return null
+        val calendarId = resolveCalendarId(preferredCalendarId) ?: return null
 
         val values = ContentValues().apply {
             put(CalendarContract.Events.CALENDAR_ID, calendarId)
@@ -54,13 +65,17 @@ class CalendarWriter(private val context: Context) {
         context.contentResolver.delete(uri, null, null)
     }
 
-    /** Finds a writable calendar, preferring the account's primary one. */
-    private fun primaryCalendarId(): Long? {
+    /** Lists writable calendars so the user can choose a reminder destination. */
+    fun listCalendars(): List<CalendarInfo> {
+        if (!hasPermission()) return emptyList()
         val projection = arrayOf(
             CalendarContract.Calendars._ID,
-            CalendarContract.Calendars.IS_PRIMARY,
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+            CalendarContract.Calendars.ACCOUNT_NAME,
             CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL,
+            CalendarContract.Calendars.IS_PRIMARY,
         )
+        val result = mutableListOf<CalendarInfo>()
         context.contentResolver.query(
             CalendarContract.Calendars.CONTENT_URI,
             projection,
@@ -69,15 +84,31 @@ class CalendarWriter(private val context: Context) {
             "${CalendarContract.Calendars.IS_PRIMARY} DESC",
         )?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(CalendarContract.Calendars._ID)
+            val nameCol =
+                cursor.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)
+            val accountCol =
+                cursor.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_NAME)
             val accessCol =
                 cursor.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL)
             while (cursor.moveToNext()) {
-                val access = cursor.getInt(accessCol)
-                if (access >= CalendarContract.Calendars.CAL_ACCESS_CONTRIBUTOR) {
-                    return cursor.getLong(idCol)
+                if (cursor.getInt(accessCol) >= CalendarContract.Calendars.CAL_ACCESS_CONTRIBUTOR) {
+                    result += CalendarInfo(
+                        id = cursor.getLong(idCol),
+                        displayName = cursor.getString(nameCol) ?: "Calendar",
+                        accountName = cursor.getString(accountCol) ?: "",
+                    )
                 }
             }
         }
-        return null
+        return result
+    }
+
+    /** Honours the user's pick when valid, else the account's primary calendar. */
+    private fun resolveCalendarId(preferredCalendarId: Long?): Long? {
+        val calendars = listCalendars()
+        if (preferredCalendarId != null && calendars.any { it.id == preferredCalendarId }) {
+            return preferredCalendarId
+        }
+        return calendars.firstOrNull()?.id
     }
 }

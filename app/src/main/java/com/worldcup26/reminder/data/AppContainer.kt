@@ -4,6 +4,7 @@ import android.content.Context
 import com.worldcup26.reminder.calendar.CalendarWriter
 import com.worldcup26.reminder.data.local.AppDatabase
 import com.worldcup26.reminder.data.remote.ScheduleApi
+import com.worldcup26.reminder.data.settings.SettingsRepository
 import com.worldcup26.reminder.work.AlarmScheduler
 
 /**
@@ -17,6 +18,8 @@ class AppContainer(context: Context) {
     private val database by lazy { AppDatabase.get(appContext) }
     private val alarmScheduler by lazy { AlarmScheduler(appContext) }
     private val calendarWriter by lazy { CalendarWriter(appContext) }
+
+    val settingsRepository by lazy { SettingsRepository(appContext) }
 
     val matchRepository by lazy {
         MatchRepository(

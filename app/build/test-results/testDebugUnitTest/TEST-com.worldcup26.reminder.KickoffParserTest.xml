@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.worldcup26.reminder.KickoffParserTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-06-15T08:59:37" hostname="HOME-PC" time="0.013">
+  <properties/>
+  <testcase name="returnsNullForGarbage" classname="com.worldcup26.reminder.KickoffParserTest" time="0.01"/>
+  <testcase name="parsesUtcMinus4DifferentOffset" classname="com.worldcup26.reminder.KickoffParserTest" time="0.003"/>
+  <testcase name="parsesUtcMinus6" classname="com.worldcup26.reminder.KickoffParserTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

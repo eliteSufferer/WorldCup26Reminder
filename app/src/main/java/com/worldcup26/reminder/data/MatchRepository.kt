@@ -41,9 +41,12 @@ class MatchRepository(
         return entities.size
     }
 
-    suspend fun follow(matchId: String, reminderMinutesBefore: Int) {
+    /** Calendars the user can choose between in settings. */
+    fun availableCalendars() = calendar.listCalendars()
+
+    suspend fun follow(matchId: String, reminderMinutesBefore: Int, calendarId: Long? = null) {
         val match = dao.getMatch(matchId) ?: return
-        val eventId = calendar.upsertEvent(match)
+        val eventId = calendar.upsertEvent(match, calendarId)
         dao.upsertSelection(
             SelectionEntity(
                 matchId = matchId,

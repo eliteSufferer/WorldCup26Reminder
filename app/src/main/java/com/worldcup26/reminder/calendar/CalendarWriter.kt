@@ -174,12 +174,67 @@ class CalendarWriter(private val context: Context) {
         return result
     }
 
-    /** Honours the user's pick when valid, else the account's primary calendar. */
+    /**
+     * Honours the user's explicit pick when it is still valid; otherwise writes to the
+     * app's own on-device calendar (created on first use), which applies instantly and
+     * needs no account sync.
+     */
     private fun resolveCalendarId(preferredCalendarId: Long?): Long? {
-        val calendars = listCalendars()
-        if (preferredCalendarId != null && calendars.any { it.id == preferredCalendarId }) {
+        if (preferredCalendarId != null && listCalendars().any { it.id == preferredCalendarId }) {
             return preferredCalendarId
         }
-        return calendars.firstOrNull()?.id
+        return ensureLocalCalendarId()
+    }
+
+    /** Returns the id of the app's dedicated local calendar, creating it if needed. */
+    private fun ensureLocalCalendarId(): Long? =
+        findLocalCalendarId() ?: createLocalCalendar()
+
+    private fun findLocalCalendarId(): Long? {
+        context.contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            arrayOf(CalendarContract.Calendars._ID),
+            "${CalendarContract.Calendars.ACCOUNT_TYPE} = ? AND " +
+                "${CalendarContract.Calendars.NAME} = ?",
+            arrayOf(CalendarContract.ACCOUNT_TYPE_LOCAL, LOCAL_CALENDAR_NAME),
+            null,
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) return cursor.getLong(0)
+        }
+        return null
+    }
+
+    private fun createLocalCalendar(): Long? {
+        val values = ContentValues().apply {
+            put(CalendarContract.Calendars.ACCOUNT_NAME, LOCAL_ACCOUNT_NAME)
+            put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL)
+            put(CalendarContract.Calendars.NAME, LOCAL_CALENDAR_NAME)
+            put(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME, LOCAL_CALENDAR_DISPLAY_NAME)
+            put(CalendarContract.Calendars.CALENDAR_COLOR, LOCAL_CALENDAR_COLOR)
+            put(
+                CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL,
+                CalendarContract.Calendars.CAL_ACCESS_OWNER,
+            )
+            put(CalendarContract.Calendars.OWNER_ACCOUNT, LOCAL_ACCOUNT_NAME)
+            put(CalendarContract.Calendars.VISIBLE, 1)
+            put(CalendarContract.Calendars.SYNC_EVENTS, 1)
+        }
+        // Creating a calendar requires the sync-adapter URI with the account params.
+        val uri = CalendarContract.Calendars.CONTENT_URI.buildUpon()
+            .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true")
+            .appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME, LOCAL_ACCOUNT_NAME)
+            .appendQueryParameter(
+                CalendarContract.Calendars.ACCOUNT_TYPE,
+                CalendarContract.ACCOUNT_TYPE_LOCAL,
+            )
+            .build()
+        return context.contentResolver.insert(uri, values)?.let { ContentUris.parseId(it) }
+    }
+
+    companion object {
+        private const val LOCAL_ACCOUNT_NAME = "WC26 Reminder"
+        private const val LOCAL_CALENDAR_NAME = "wc26_reminders"
+        private const val LOCAL_CALENDAR_DISPLAY_NAME = "WC26 Reminders"
+        private const val LOCAL_CALENDAR_COLOR = 0xFF1B5E20.toInt()
     }
 }

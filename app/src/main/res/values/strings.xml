@@ -40,9 +40,9 @@
     <string name="settings_reminder_header">Default reminder</string>
     <string name="settings_reminder_minutes">%d min before kickoff</string>
     <string name="settings_calendar_header">Calendar</string>
-    <string name="settings_calendar_default">Primary (automatic)</string>
+    <string name="settings_calendar_default">WC26 Reminders · on device (default)</string>
     <string name="settings_calendar_none">No writable calendar found. Grant calendar access.</string>
-    <string name="settings_calendar_note">New follows are written here. Existing events are not moved. Local (on-device) calendars apply instantly; Google calendars depend on that account\'s sync.</string>
+    <string name="settings_calendar_note">By default events go to the app\'s own on-device calendar (instant, no sync needed). Pick a Google calendar to sync across devices — that depends on the account\'s sync. Existing events are not moved.</string>
     <string name="settings_calendar_on_device"> · On device</string>
     <string name="settings_tab_header">Open on launch</string>
     <string name="settings_tab_groups">Groups</string>

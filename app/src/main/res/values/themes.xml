@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme. Compose drives the actual colors via MaterialTheme; this
+         theme only needs to be a Material 3 parent with no action bar. -->
+    <style name="Theme.WorldCup26Reminder" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

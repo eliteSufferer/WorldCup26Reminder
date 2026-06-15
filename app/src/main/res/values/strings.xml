@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WC26 Reminder</string>
+
+    <!-- Notifications -->
+    <string name="channel_reminders_name">Match reminders</string>
+    <string name="channel_reminders_desc">Reminders before matches you are following</string>
+
+    <!-- UI -->
+    <string name="title_matches">World Cup 2026</string>
+    <string name="action_refresh">Refresh schedule</string>
+    <string name="empty_loading">Loading schedule…</string>
+    <string name="empty_no_matches">No matches yet. Pull to refresh.</string>
+</resources>

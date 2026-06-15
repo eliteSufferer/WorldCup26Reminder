@@ -15,12 +15,17 @@
     <string name="empty_loading">Loading schedule…</string>
     <string name="empty_no_matches">No matches yet. Pull to refresh.</string>
 
+    <!-- Tabs -->
+    <string name="tab_groups">Groups</string>
+    <string name="tab_playoff">Playoff</string>
+    <string name="bracket_empty">Knockout bracket appears once group standings are decided.</string>
+
     <!-- Filters -->
     <string name="filter_search_team">Search team</string>
     <string name="filter_group">Group</string>
     <string name="filter_all_groups">All groups</string>
     <string name="filter_followed">Followed</string>
-    <string name="filter_upcoming">Upcoming</string>
+    <string name="filter_show_previous">Show previous</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
@@ -31,4 +36,7 @@
     <string name="settings_calendar_default">Primary (automatic)</string>
     <string name="settings_calendar_none">No writable calendar found. Grant calendar access.</string>
     <string name="settings_calendar_note">New follows are written here. Existing events are not moved.</string>
+    <string name="settings_tab_header">Open on launch</string>
+    <string name="settings_tab_groups">Groups</string>
+    <string name="settings_tab_playoff">Playoff</string>
 </resources>

@@ -24,8 +24,16 @@ class SettingsRepository(context: Context) {
     val selectedCalendarId: Flow<Long?> =
         store.data.map { it[KEY_CALENDAR_ID] }
 
+    /** Tab shown on launch: 0 = Groups, 1 = Playoff. */
+    val defaultTabIndex: Flow<Int> =
+        store.data.map { it[KEY_DEFAULT_TAB] ?: TAB_GROUPS }
+
     suspend fun setDefaultReminderMinutes(minutes: Int) {
         store.edit { it[KEY_REMINDER_MINUTES] = minutes }
+    }
+
+    suspend fun setDefaultTabIndex(index: Int) {
+        store.edit { it[KEY_DEFAULT_TAB] = index }
     }
 
     suspend fun setSelectedCalendarId(id: Long?) {
@@ -38,7 +46,11 @@ class SettingsRepository(context: Context) {
         const val DEFAULT_REMINDER_MINUTES = 30
         val REMINDER_OPTIONS = listOf(10, 15, 30, 60, 120)
 
+        const val TAB_GROUPS = 0
+        const val TAB_PLAYOFF = 1
+
         private val KEY_REMINDER_MINUTES = intPreferencesKey("default_reminder_minutes")
         private val KEY_CALENDAR_ID = longPreferencesKey("selected_calendar_id")
+        private val KEY_DEFAULT_TAB = intPreferencesKey("default_tab_index")
     }
 }

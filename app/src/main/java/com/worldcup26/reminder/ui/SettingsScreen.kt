@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.worldcup26.reminder.R
 import com.worldcup26.reminder.calendar.CalendarInfo
+import com.worldcup26.reminder.data.settings.SettingsRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +35,8 @@ fun SettingsScreen(
     reminderMinutes: Int,
     reminderOptions: List<Int>,
     onReminderSelect: (Int) -> Unit,
+    defaultTabIndex: Int,
+    onDefaultTabSelect: (Int) -> Unit,
     calendars: List<CalendarInfo>,
     selectedCalendarId: Long?,
     onCalendarSelect: (Long?) -> Unit,
@@ -68,6 +71,20 @@ fun SettingsScreen(
                     onClick = { onReminderSelect(minutes) },
                 )
             }
+
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+
+            SectionHeader(stringResource(R.string.settings_tab_header))
+            SelectableRow(
+                label = stringResource(R.string.settings_tab_groups),
+                selected = defaultTabIndex == SettingsRepository.TAB_GROUPS,
+                onClick = { onDefaultTabSelect(SettingsRepository.TAB_GROUPS) },
+            )
+            SelectableRow(
+                label = stringResource(R.string.settings_tab_playoff),
+                selected = defaultTabIndex == SettingsRepository.TAB_PLAYOFF,
+                onClick = { onDefaultTabSelect(SettingsRepository.TAB_PLAYOFF) },
+            )
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
 

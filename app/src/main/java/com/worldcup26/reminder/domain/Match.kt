@@ -23,4 +23,17 @@ data class Match(
     val hasScore: Boolean get() = scoreFt1 != null && scoreFt2 != null
     val isUpcoming: Boolean get() = kickoff.isAfter(Instant.now())
     val title: String get() = "$team1 — $team2"
+
+    /** Group-stage matches carry a group label; knockout matches do not. */
+    val isKnockout: Boolean get() = group == null
+
+    /** True once the match is over (kickoff + a typical match length has passed). */
+    val isFinished: Boolean
+        get() = kickoff.plusSeconds(FINISHED_AFTER_MINUTES * 60).isBefore(Instant.now())
+
+    val stage: KnockoutStage? get() = KnockoutStage.fromRound(round)
+
+    companion object {
+        private const val FINISHED_AFTER_MINUTES = 150L
+    }
 }

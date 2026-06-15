@@ -41,21 +41,25 @@ class MainActivity : ComponentActivity() {
 
                 when (screen) {
                     Screen.LIST -> {
-                        val matches by viewModel.matches.collectAsState()
+                        val groupMatches by viewModel.groupMatches.collectAsState()
+                        val knockoutMatches by viewModel.knockoutMatches.collectAsState()
                         val groups by viewModel.groups.collectAsState()
                         val filter by viewModel.filter.collectAsState()
                         val refreshing by viewModel.refreshing.collectAsState()
+                        val initialTab by viewModel.defaultTabIndex.collectAsState()
                         MatchListScreen(
-                            matches = matches,
+                            groupMatches = groupMatches,
+                            knockoutMatches = knockoutMatches,
                             groups = groups,
                             filter = filter,
                             refreshing = refreshing,
+                            initialTab = initialTab,
                             onRefresh = viewModel::refresh,
                             onToggleFollow = viewModel::toggleFollow,
                             onQueryChange = viewModel::setQuery,
                             onGroupChange = viewModel::setGroup,
                             onToggleOnlyFollowed = viewModel::toggleOnlyFollowed,
-                            onToggleOnlyUpcoming = viewModel::toggleOnlyUpcoming,
+                            onToggleShowPrevious = viewModel::toggleShowPrevious,
                             onOpenSettings = {
                                 viewModel.loadCalendars()
                                 screen = Screen.SETTINGS
@@ -64,12 +68,15 @@ class MainActivity : ComponentActivity() {
                     }
                     Screen.SETTINGS -> {
                         val reminderMinutes by viewModel.defaultReminderMinutes.collectAsState()
+                        val defaultTabIndex by viewModel.defaultTabIndex.collectAsState()
                         val calendars by viewModel.calendars.collectAsState()
                         val selectedCalendarId by viewModel.selectedCalendarId.collectAsState()
                         SettingsScreen(
                             reminderMinutes = reminderMinutes,
                             reminderOptions = SettingsRepository.REMINDER_OPTIONS,
                             onReminderSelect = viewModel::setDefaultReminderMinutes,
+                            defaultTabIndex = defaultTabIndex,
+                            onDefaultTabSelect = viewModel::setDefaultTabIndex,
                             calendars = calendars,
                             selectedCalendarId = selectedCalendarId,
                             onCalendarSelect = viewModel::setSelectedCalendarId,
@@ -81,7 +88,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // Populate on first launch when the cache is still empty.
-        if (viewModel.matches.value.isEmpty()) viewModel.refresh()
+        if (viewModel.allMatches.value.isEmpty()) viewModel.refresh()
     }
 
     private fun requestRuntimePermissions() {

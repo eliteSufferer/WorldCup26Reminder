@@ -1,10 +1,13 @@
 package com.worldcup26.reminder.calendar
 
 import android.Manifest
+import android.accounts.Account
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Bundle
 import android.provider.CalendarContract
 import androidx.core.content.ContextCompat
 import com.worldcup26.reminder.data.local.MatchEntity
@@ -74,7 +77,51 @@ class CalendarWriter(private val context: Context) {
             }
             context.contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminder)
         }
+
+        requestSyncForCalendar(calendarId)
         return eventId
+    }
+
+    /**
+     * Asks the calendar's account to sync now so a freshly-written event is pushed to
+     * the server promptly instead of waiting for the next periodic sync. No-op for
+     * local calendars (nothing to sync) and harmless if sync is unavailable.
+     */
+    private fun requestSyncForCalendar(calendarId: Long) {
+        val (accountName, accountType) = accountForCalendar(calendarId) ?: return
+        if (accountType == CalendarContract.ACCOUNT_TYPE_LOCAL) return
+        runCatching {
+            val extras = Bundle().apply {
+                putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true)
+                putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true)
+            }
+            ContentResolver.requestSync(
+                Account(accountName, accountType),
+                CalendarContract.AUTHORITY,
+                extras,
+            )
+        }
+    }
+
+    private fun accountForCalendar(calendarId: Long): Pair<String, String>? {
+        val uri = ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, calendarId)
+        context.contentResolver.query(
+            uri,
+            arrayOf(
+                CalendarContract.Calendars.ACCOUNT_NAME,
+                CalendarContract.Calendars.ACCOUNT_TYPE,
+            ),
+            null,
+            null,
+            null,
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val name = cursor.getString(0) ?: return null
+                val type = cursor.getString(1) ?: return null
+                return name to type
+            }
+        }
+        return null
     }
 
     fun deleteEvent(eventId: Long) {

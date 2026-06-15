@@ -5,6 +5,7 @@ import com.worldcup26.reminder.data.local.MatchDao
 import com.worldcup26.reminder.data.local.MatchEntity
 import com.worldcup26.reminder.data.local.MatchWithSelection
 import com.worldcup26.reminder.data.local.SelectionEntity
+import com.worldcup26.reminder.data.remote.BroadcastsApi
 import com.worldcup26.reminder.data.remote.KickoffParser
 import com.worldcup26.reminder.data.remote.MatchDto
 import com.worldcup26.reminder.data.remote.ScheduleApi
@@ -22,6 +23,7 @@ import java.time.Instant
  */
 class MatchRepository(
     private val api: ScheduleApi,
+    private val broadcasts: BroadcastsApi,
     private val dao: MatchDao,
     private val alarms: AlarmScheduler,
     private val calendar: CalendarWriter,
@@ -37,7 +39,8 @@ class MatchRepository(
      */
     suspend fun refresh(): Int {
         val schedule = api.fetchSchedule()
-        val entities = schedule.matches.mapNotNull { it.toEntityOrNull() }
+        val kinopoiskIds = runCatching { broadcasts.kinopoiskIds() }.getOrDefault(emptySet())
+        val entities = schedule.matches.mapNotNull { it.toEntityOrNull(kinopoiskIds) }
         dao.upsertMatches(entities)
         rescheduleFollowed()
         return entities.size
@@ -83,10 +86,11 @@ class MatchRepository(
         }
     }
 
-    private fun MatchDto.toEntityOrNull(): MatchEntity? {
+    private fun MatchDto.toEntityOrNull(kinopoiskIds: Set<String>): MatchEntity? {
         val instant = KickoffParser.toInstant(date, time) ?: return null
+        val id = stableId(instant)
         return MatchEntity(
-            id = stableId(instant),
+            id = id,
             kickoffEpochMillis = instant.toEpochMilli(),
             team1 = team1,
             team2 = team2,
@@ -95,6 +99,7 @@ class MatchRepository(
             ground = ground,
             scoreFt1 = score?.ft?.getOrNull(0),
             scoreFt2 = score?.ft?.getOrNull(1),
+            broadcaster = if (id in kinopoiskIds) BROADCASTER_KINOPOISK else BROADCASTER_MATCH_TV,
         )
     }
 
@@ -112,6 +117,9 @@ class MatchRepository(
     private fun String.slug(): String = trim().replace(Regex("[^A-Za-z0-9]+"), "")
 
     companion object {
+        private const val BROADCASTER_MATCH_TV = "Матч ТВ"
+        private const val BROADCASTER_KINOPOISK = "Кинопоиск"
+
         fun MatchWithSelection.toDomain(): Match = Match(
             id = id,
             kickoff = Instant.ofEpochMilli(kickoffEpochMillis),
@@ -122,6 +130,7 @@ class MatchRepository(
             ground = ground,
             scoreFt1 = scoreFt1,
             scoreFt2 = scoreFt2,
+            broadcaster = broadcaster,
             reminderMinutesBefore = reminderMinutesBefore,
         )
 
@@ -135,6 +144,7 @@ class MatchRepository(
             ground = ground,
             scoreFt1 = scoreFt1,
             scoreFt2 = scoreFt2,
+            broadcaster = broadcaster,
             reminderMinutesBefore = null,
         )
     }

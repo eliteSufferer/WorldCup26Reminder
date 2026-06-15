@@ -1,0 +1,28 @@
+{
+  "_comment": "Per-match Russian broadcaster split for WC2026. Matches listed here air on Kinopoisk; every other match airs on Match TV (per championat.com published split). Keys are the app's stable match ids. Knockout Kinopoisk matches are TBD (teams not yet known) and will be added by num later. Verify against an official source before trusting.",
+  "kinopoisk": [
+    "grp-2026-06-14-group e-germany-curaao",
+    "grp-2026-06-14-group e-ivorycoast-ecuador",
+    "grp-2026-06-15-group h-saudiarabia-uruguay",
+    "grp-2026-06-16-group j-argentina-algeria",
+    "grp-2026-06-17-group l-ghana-panama",
+    "grp-2026-06-18-group b-canada-qatar",
+    "grp-2026-06-19-group c-scotland-morocco",
+    "grp-2026-06-21-group g-belgium-iran",
+    "grp-2026-06-21-group h-uruguay-capeverde",
+    "grp-2026-06-22-group i-france-iraq",
+    "grp-2026-06-23-group l-panama-croatia",
+    "grp-2026-06-24-group a-southafrica-southkorea",
+    "grp-2026-06-24-group b-bosniaherzegovina-qatar",
+    "grp-2026-06-24-group c-morocco-haiti",
+    "grp-2026-06-25-group d-paraguay-australia",
+    "grp-2026-06-25-group e-curaao-ivorycoast",
+    "grp-2026-06-25-group f-japan-sweden",
+    "grp-2026-06-26-group g-egypt-iran",
+    "grp-2026-06-26-group h-capeverde-saudiarabia",
+    "grp-2026-06-26-group i-senegal-iraq",
+    "grp-2026-06-27-group j-algeria-austria",
+    "grp-2026-06-27-group k-colombia-portugal",
+    "grp-2026-06-27-group l-croatia-ghana"
+  ]
+}

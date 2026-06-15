@@ -16,6 +16,8 @@ data class Match(
     val ground: String?,
     val scoreFt1: Int?,
     val scoreFt2: Int?,
+    /** Russian broadcaster label, e.g. "Матч ТВ" / "Кинопоиск". */
+    val broadcaster: String?,
     /** Null when the user is not following this match. */
     val reminderMinutesBefore: Int?,
 ) {

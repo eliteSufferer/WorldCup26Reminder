@@ -21,6 +21,7 @@ data class MatchWithSelection(
     val ground: String?,
     val scoreFt1: Int?,
     val scoreFt2: Int?,
+    val broadcaster: String?,
     val reminderMinutesBefore: Int?,
     val calendarEventId: Long?,
 )

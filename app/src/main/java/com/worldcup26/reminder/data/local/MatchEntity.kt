@@ -19,4 +19,5 @@ data class MatchEntity(
     val ground: String?,
     val scoreFt1: Int?,
     val scoreFt2: Int?,
+    val broadcaster: String? = null,
 )

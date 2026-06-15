@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -38,6 +39,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             WorldCupTheme {
                 var screen by remember { mutableStateOf(Screen.LIST) }
+
+                // System back on the settings screen returns to the list instead of
+                // leaving the app.
+                BackHandler(enabled = screen == Screen.SETTINGS) { screen = Screen.LIST }
 
                 when (screen) {
                     Screen.LIST -> {

@@ -15,6 +15,8 @@ data class CalendarInfo(
     val id: Long,
     val displayName: String,
     val accountName: String,
+    /** Local (on-device) calendars apply instantly; Google ones depend on sync. */
+    val isLocal: Boolean,
 )
 
 /**
@@ -88,6 +90,7 @@ class CalendarWriter(private val context: Context) {
             CalendarContract.Calendars._ID,
             CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
             CalendarContract.Calendars.ACCOUNT_NAME,
+            CalendarContract.Calendars.ACCOUNT_TYPE,
             CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL,
             CalendarContract.Calendars.IS_PRIMARY,
         )
@@ -95,7 +98,8 @@ class CalendarWriter(private val context: Context) {
         context.contentResolver.query(
             CalendarContract.Calendars.CONTENT_URI,
             projection,
-            null,
+            // Only visible calendars — events in a hidden calendar would never show.
+            "${CalendarContract.Calendars.VISIBLE} = 1",
             null,
             "${CalendarContract.Calendars.IS_PRIMARY} DESC",
         )?.use { cursor ->
@@ -104,6 +108,8 @@ class CalendarWriter(private val context: Context) {
                 cursor.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)
             val accountCol =
                 cursor.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_NAME)
+            val accountTypeCol =
+                cursor.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_TYPE)
             val accessCol =
                 cursor.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL)
             while (cursor.moveToNext()) {
@@ -112,6 +118,8 @@ class CalendarWriter(private val context: Context) {
                         id = cursor.getLong(idCol),
                         displayName = cursor.getString(nameCol) ?: "Calendar",
                         accountName = cursor.getString(accountCol) ?: "",
+                        isLocal = cursor.getString(accountTypeCol) ==
+                            CalendarContract.ACCOUNT_TYPE_LOCAL,
                     )
                 }
             }

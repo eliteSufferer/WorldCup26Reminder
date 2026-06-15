@@ -102,9 +102,13 @@ fun SettingsScreen(
                     onClick = { onCalendarSelect(null) },
                 )
                 calendars.forEach { cal ->
+                    val suffix = when {
+                        cal.isLocal -> stringResource(R.string.settings_calendar_on_device)
+                        cal.accountName.isNotBlank() -> " · ${cal.accountName}"
+                        else -> ""
+                    }
                     SelectableRow(
-                        label = if (cal.accountName.isBlank()) cal.displayName
-                        else "${cal.displayName} · ${cal.accountName}",
+                        label = cal.displayName + suffix,
                         selected = selectedCalendarId == cal.id,
                         onClick = { onCalendarSelect(cal.id) },
                     )
